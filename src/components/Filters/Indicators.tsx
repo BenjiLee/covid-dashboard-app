@@ -2,7 +2,17 @@ import React, { Component } from 'react';
 import { Select } from 'antd';
 import { STATS } from '../../utils/constants.js';
 
-class Indicators extends Component {
+interface Props {
+    onButtonClick: (any) => void; //FIXME any should be typed
+    stat: any; //FIXME any should be typed
+}
+
+interface State {
+    children: Array<any>; //FIXME any should be typed
+}
+
+class Indicators extends Component<Props, State> {
+    
     constructor(props) {
         super(props);
         this.state = {
