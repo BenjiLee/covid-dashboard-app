@@ -1,6 +1,7 @@
 import { DataSetActions, StatsForMapActions, UPDATE_DATASET, UPDATE_STATS_FOR_MAP } from "./actionTypes";
 import { fetchJSON } from "../../utils/fetch";
 import { Dispatch } from "redux";
+import { ThunkAction } from "redux-thunk";
 
 
 export function setDataSet(payload: string): DataSetActions {
@@ -10,14 +11,14 @@ export function setDataSet(payload: string): DataSetActions {
     };
 }
 
-export function fetchDataSet(geoid: string) {
+export function fetchDataSet(geoid: string): ThunkAction<Promise<void>, {}, {}, DataSetActions> {
     return async (dispatch: Dispatch<DataSetActions>) => {
         try {
-            console.log(`fetchDataSet(): attempting to fetch for geoid=${geoid}`);
             const response = await fetchJSON(geoid);
-            dispatch(setDataSet(response))
+            dispatch(setDataSet(response));
+            console.log(`fetchDataSet(): fetch successful`);
         } catch (e) {
-            console.log(`fetchDataSet(): error when fetching. message=${e.message}`)
+            console.log(`fetchDataSet(): error when fetching for geoid=${geoid} message=${e.message}`)
         }
     };
 

@@ -5,7 +5,6 @@ import Scenarios from '../Filters/Scenarios.tsx';
 import DateSlider from './DateSlider';
 import { styles } from '../../utils/constants';
 import { buildScenarios } from '../../utils/utils';
-import { fetchJSON } from '../../utils/fetch';
 import { timeFormat, utcParse } from 'd3-time-format'
 import { connect } from 'react-redux';
 import { fetchStatsForMap } from "../../redux/actions/statsForMap_actions";
@@ -35,23 +34,23 @@ class MainMap extends Component {
     };
 
     componentDidUpdate(prevProp) {
-        const { geoid, dataset, statsForCounty } = this.props;
+        const { geoid, dataSet, statsForCounty } = this.props;
 
         if (geoid !== prevProp.geoid ||
-            dataset !== prevProp.dataset ||
+            dataSet !== prevProp.dataSet ||
             statsForCounty !== prevProp.statsForCounty) {
             console.log("MainMap componentDidUpdate: initializeMap");
-            this.initializeMap(geoid, this.props.dataset);
+            this.initializeMap(geoid, this.props.dataSet);
             this.setState({ statsLoading: false });
         }
     };
 
-    initializeMap(geoid, dataset) {
+    initializeMap(geoid, dataSet) {
         console.log('initializeMap statsForCounty', this.props.statsForCounty);
         // instantiate scenarios and dates
-        const SCENARIOS = buildScenarios(dataset);
+        const SCENARIOS = buildScenarios(dataSet);
         const scenario = SCENARIOS[0].key;
-        const dates = dataset[scenario].dates.map(d => parseDate(d));
+        const dates = dataSet[scenario].dates.map(d => parseDate(d));
 
         // instantiate stats and boundaries given geoid
         const state = geoid.slice(0, 2);
@@ -61,7 +60,7 @@ class MainMap extends Component {
             .findIndex(date => formatDate(date) === formatDate(new Date()));
 
         this.setState({
-            datasetMap: dataset,
+            datasetMap: dataSet,
             dates,
             SCENARIOS,
             scenario,
@@ -171,7 +170,7 @@ class MainMap extends Component {
 // This usually means you need to combine the parent props and the
 // redux state.
 function mapStateToProps(state, ownProps) {
-    const { statsForMap } = state;
+    const { statsForMap, dataSet } = state;
 
     let statsForCounty = null;
     const slicedGeoId = ownProps.geoid.slice(0, 2);
@@ -181,6 +180,7 @@ function mapStateToProps(state, ownProps) {
     return {
         ...ownProps,
         statsForCounty,
+        dataSet
     }
 }
 

@@ -6,10 +6,10 @@ import { LEVELS } from '../utils/constants';
 
 const parseDate = utcParse('%Y-%m-%d');
 
-export function buildScenarios(dataset) {
+export function buildScenarios(dataSet) {
   // Instantiates constant scenarios used for a given geoid
 
-  const keys = Object.keys(dataset); 
+  const keys = Object.keys(dataSet);
   const scenarioArray = []; 
   for (let i = 0; i < keys.length; i++) {
     const obj = {}; 
@@ -24,12 +24,12 @@ export function buildScenarios(dataset) {
   return scenarioArray;
 }
 
-export function buildScenarioMap(dataset) {
+export function buildScenarioMap(dataSet) {
   // Instantiates mapping of scenario to list of severities
 
   let obj = {}; 
-  Object.keys(dataset).forEach(scenario => {
-    let keys = Object.keys(dataset[scenario]); 
+  Object.keys(dataSet).forEach(scenario => {
+    let keys = Object.keys(dataSet[scenario]);
     keys = keys.filter(key => key !== "dates"); 
     obj[scenario] = keys; 
   })

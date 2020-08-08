@@ -9,6 +9,7 @@ import IndicatorSelection from './IndicatorSelection';
 import { styles, STATS } from '../../utils/constants';
 import { buildScenarios, buildScenarioMap } from '../../utils/utils';
 import { utcParse } from 'd3-time-format'
+import connect from "react-redux/es/connect/connect";
 const parseDate = utcParse('%Y-%m-%d')
 
 
@@ -30,35 +31,30 @@ class MainChart extends Component {
         };
     };
 
-    componentDidMount() {
-        const { dataset } = this.props;
-        this.initializeChart(dataset)
-    };
-
     componentDidUpdate(prevProp) {
-        const { dataset } = this.props;
+        const { dataSet } = this.props;
 
-        if (dataset !== prevProp.dataset) {
-            this.initializeChart(dataset)
+        if (dataSet !== prevProp.dataSet) {
+            this.initializeChart(dataSet)
         }
     };
 
-    initializeChart(dataset) {
+    initializeChart(dataSet) {
         // instantiate scenarios, initial default indicators
-        const SCENARIOS = buildScenarios(dataset);  
+        const SCENARIOS = buildScenarios(dataSet);
         const scenarioList = SCENARIOS.map(s => s.name);
-        const scenarioMap = buildScenarioMap(dataset);
+        const scenarioMap = buildScenarioMap(dataSet);
         const statList = STATS.slice(0,2)
 
         // instantiate start and end date (past 2 weeks) for summary stats
-        const dates = dataset[SCENARIOS[0].key].dates.map( d => parseDate(d));
+        const dates = dataSet[SCENARIOS[0].key].dates.map(d => parseDate(d));
         const start = new Date(); 
         start.setDate(start.getDate() - 14); 
 
         // dataset needs to be set to state at the same time as other props
         // otherwise, children updates will occur at different times
         this.setState({
-            datasetChart: dataset, 
+            datasetChart: dataSet,
             dates,
             SCENARIOS,
             scenarioList,
@@ -181,4 +177,12 @@ class MainChart extends Component {
     }
 }
 
-export default MainChart;
+function mapStateToProps(state, ownProps) {
+    const { dataSet } = state;
+    return {
+        ...ownProps,
+        dataSet,
+    }
+}
+
+export default connect(mapStateToProps)(MainChart);

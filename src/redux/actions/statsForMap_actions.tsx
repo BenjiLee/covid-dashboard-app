@@ -14,9 +14,9 @@ export function setStatsForMap(payload: string): StatsForMapActions {
 export function fetchStatsForMap() {
     return async (dispatch: Dispatch<StatsForMapActions>) => {
         try {
-            console.log(`fetchStatsForMap(): attempting to fetch`);
             const response = await fetchJSON('statsForMap');
             dispatch(setStatsForMap(response))
+            console.log(`fetchStatsForMap(): fetch successful`);
         } catch (e) {
             console.log(`fetchStatsForMap(): error when fetching. message=${e.message}`)
         }

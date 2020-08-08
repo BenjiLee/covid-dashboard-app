@@ -18,6 +18,7 @@ import { getStatThreshold, getDateThreshold, flagSimsOverThreshold,
 import { styles, margin, dimMultipliers, numDisplaySims, STATS, LEVELS } from '../../utils/constants';
 import { utcParse } from 'd3-time-format';
 import { timeDay } from 'd3-time';
+import connect from "react-redux/es/connect/connect";
 
 const parseDate = utcParse('%Y-%m-%d');
 
@@ -59,38 +60,34 @@ class MainGraph extends Component {
         };
     };
 
-    componentDidMount() {
-        const { severity, stat } = this.state;
-        this.initialize(this.props.dataset, stat, severity);
-    };
 
     componentDidUpdate(prevProp) {
         const { severity, stat } = this.state;
-        if (this.props.dataset !== prevProp.dataset) {
-            this.initialize(this.props.dataset, stat, severity)
+        if (this.props.dataSet !== prevProp.dataSet) {
+            this.initialize(this.props.dataSet, stat, severity)
         }
     };
 
-    initialize = (dataset, stat) => {
+    initialize = (dataSet, stat) => {
         // initialize() trigged on mount and Dataset change
         const { dateRange } = this.state
 
         // SCENARIOS: various scenario variables used for a given geoid
-        const SCENARIOS = buildScenarios(dataset);  
-        const scenarioMap = buildScenarioMap(dataset);
+        const SCENARIOS = buildScenarios(dataSet);
+        const scenarioMap = buildScenarioMap(dataSet);
         const firstScenario = SCENARIOS[0].key;
         const firstSeverity = scenarioMap[firstScenario][0];
 
         // firstSeverity need to be designated in case not all death rate LEVELS exist
-        const dates = dataset[firstScenario].dates.map( d => parseDate(d));
-        const series = dataset[firstScenario][firstSeverity][stat.key]
+        const dates = dataSet[firstScenario].dates.map( d => parseDate(d));
+        const series = dataSet[firstScenario][firstSeverity][stat.key]
             .slice(0, numDisplaySims);
         const severityList = buildSeverities(scenarioMap, [], firstScenario);
         const sevList = _.cloneDeep(severityList);
         sevList[0].scenario = firstScenario;
 
         // allSims used for R0 histogram
-        const allSims = dataset[firstScenario][firstSeverity][stat.key];
+        const allSims = dataSet[firstScenario][firstSeverity][stat.key];
 
         // initialize Threshold and slider ranges
         const idxMin = timeDay.count(dates[0], dateRange[0]);
@@ -103,14 +100,14 @@ class MainGraph extends Component {
         const filteredSeries = filterByDate(series, idxMin, idxMax)
 
         const confBoundsList = getConfBounds(
-            dataset, [SCENARIOS[0]], severityList, stat, dates, idxMin, idxMax)
+            dataSet, [SCENARIOS[0]], severityList, stat, dates, idxMin, idxMax)
         const actualList = getActuals(this.props.geoid, stat, [SCENARIOS[0]]);
 
-        const r0full = getR0range(dataset, SCENARIOS[0], sevList[0], stat);
+        const r0full = getR0range(dataSet, SCENARIOS[0], sevList[0], stat);
         // seriesListForBrush used by handleBrush to initialize instead of R0 filtering 
         // series is updated and set to state in scenario, sev, stat, r0 change handlers
         const seriesListForBrush = filterR0(
-            r0full, [SCENARIOS[0]], sevList, stat, dataset, numDisplaySims);
+            r0full, [SCENARIOS[0]], sevList, stat, dataSet, numDisplaySims);
 
         this.setState({
             SCENARIOS,
@@ -140,7 +137,7 @@ class MainGraph extends Component {
 
     update = (seriesList, scenarioList, stat, severityList, dateRange) => {
         // update() triggered on Scenario, Stat, Severity, R0, Brush change
-        const { dataset, geoid } = this.props;
+        const { dataSet, geoid } = this.props;
         const { dates } = this.state;
 
         const idxMin = timeDay.count(dates[0], dateRange[0]);
@@ -160,7 +157,7 @@ class MainGraph extends Component {
             scenarioList, seriesList, simsOverList);
 
         const confBoundsList = getConfBounds(
-            dataset, scenarioList, severityList, stat, dates, idxMin, idxMax)
+            dataSet, scenarioList, severityList, stat, dates, idxMin, idxMax)
         const actualList = getActuals(geoid, stat, scenarioList);
 
         this.setState({
@@ -178,18 +175,18 @@ class MainGraph extends Component {
     }
 
     handleIndicatorClick = (stat) => {
-        const { dataset } = this.props;
+        const { dataSet } = this.props;
         const { scenarioList, severityList, r0selected, dateRange } = this.state;
 
         const seriesList = filterR0(
-            r0selected, scenarioList, severityList, stat, dataset, numDisplaySims);
+            r0selected, scenarioList, severityList, stat, dataSet, numDisplaySims);
 
         this.setState({stat, seriesListForBrush: seriesList, animateTransition: true})
         this.update(seriesList, scenarioList, stat, severityList, dateRange);
     };
 
     handleScenarioClickGraph = (scenarios) => {
-        const { dataset } = this.props;
+        const { dataSet } = this.props;
         const { stat, r0selected, dateRange, scenarioMap } = this.state;
 
         const scenarioClkCntr = this.state.scenarioClickCounter + 1;
@@ -205,7 +202,7 @@ class MainGraph extends Component {
         }
 
         const seriesList = filterR0(
-            r0selected, scenarioList, severityList, stat, dataset, numDisplaySims);
+            r0selected, scenarioList, severityList, stat, dataSet, numDisplaySims);
         
         this.setState({
             scenarioList,
@@ -218,7 +215,7 @@ class MainGraph extends Component {
     };
 
     handleSeveritiesClick = (i) => {
-        const { dataset } = this.props;
+        const { dataSet } = this.props;
         const { scenarioList, stat, r0selected, dateRange } = this.state;
 
         let severityList = _.cloneDeep(this.state.severityList);
@@ -228,7 +225,7 @@ class MainGraph extends Component {
             }
         })
         const seriesList = filterR0(
-            r0selected, scenarioList, severityList, stat, dataset, numDisplaySims);
+            r0selected, scenarioList, severityList, stat, dataSet, numDisplaySims);
         
         this.setState({
             severityList, 
@@ -243,11 +240,11 @@ class MainGraph extends Component {
     handleSeveritiesHoverLeave = () => {this.setState({scenarioHovered: ''});}
 
     handleR0Change = (r0selected) => {
-        const { dataset } = this.props;
+        const { dataSet } = this.props;
         const { scenarioList, severityList, stat, dateRange } = this.state;
 
         const seriesList = filterR0(
-            r0selected, scenarioList, severityList, stat, dataset, numDisplaySims);
+            r0selected, scenarioList, severityList, stat, dataSet, numDisplaySims);
         
         this.setState({
             r0selected,
@@ -258,11 +255,11 @@ class MainGraph extends Component {
     };
 
     handleR0Resample = () => {
-        const { dataset } = this.props;
+        const { dataSet } = this.props;
         const { scenarioList, severityList, stat, r0selected, dateRange } = this.state;
 
         const seriesList = filterR0(
-            r0selected, scenarioList, severityList, stat, dataset, numDisplaySims);
+            r0selected, scenarioList, severityList, stat, dataSet, numDisplaySims);
         
         this.setState({
             r0selected,
@@ -340,14 +337,14 @@ class MainGraph extends Component {
     }
 
     handleConfClick = () => {
-        const { dataset } = this.props;
+        const { dataSet } = this.props;
         const { scenarioList, severityList, stat, dates, dateRange } = this.state;
 
         const idxMin = timeDay.count(dates[0], dateRange[0]);
         const idxMax = timeDay.count(dates[0], dateRange[1]);
 
         const confBoundsList = getConfBounds(
-            dataset, scenarioList, severityList, stat, dates, idxMin, idxMax);
+            dataSet, scenarioList, severityList, stat, dates, idxMin, idxMax);
 
         this.setState({
             confBoundsList, 
@@ -517,4 +514,12 @@ class MainGraph extends Component {
     }
 }
 
-export default MainGraph;
+function mapStateToProps(state, ownProps) {
+    const { dataSet } = state;
+    return {
+        ...ownProps,
+        dataSet,
+    }
+}
+
+export default connect(mapStateToProps)(MainGraph);

@@ -8,15 +8,16 @@ import MainChart from './Chart/MainChart';
 import MainMap from './Map/MainMap';
 import Methodology from './Methodology';
 import About from './About';
-
+import connect from "react-redux/es/connect/connect";
+import { fetchDataSet, setDataSet } from "../redux/actions/dataSet_actions";
+import store from '../redux/store'
 
 class MainContainer extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            dataset: {},
-            dataLoaded: false, 
-            geoid: defaultGeoid, 
+            dataLoaded: false,
+            geoid: defaultGeoid,
             graphW: 0,
             graphH: 0,
             mapContainerW: 0,
@@ -30,54 +31,55 @@ class MainContainer extends Component {
 
         this.updateGraphDimensions();
         this.updateMapContainerDimensions();
-        
-        const { geoid } = this.state;
-        // TODO: implement async/await similar to MainMap componentDidMount
-        fetchJSON(geoid)
-            .then(dataset => this.setState({dataset}))
-            .catch(e => console.log('Fetch was problematic: ' + e.message))
-            .then(() => this.setState({dataLoaded: true}));
+
+        this.props.fetchDataSet(this.state.geoid);
     };
 
+    componentDidUpdate(prevProps, prevState, snapshot) {
+        if (prevProps.dataSet !== this.props.dataSet) {
+            this.setState({ dataLoaded: true })
+        }
+    }
+
     componentWillUnmount() {
-        window.removeEventListener('resize', this.updateGraphDimensions)
-        window.removeEventListener('resize', this.updateMapContainerDimensions)
+        window.removeEventListener('resize', this.updateGraphDimensions);
+        window.removeEventListener('resize', this.updateMapContainerDimensions);
     }
 
     updateGraphDimensions = () => {
         const ratioH = dimMultipliers.graphDesktopH;
-        const ratioW = window.innerWidth > 800 ? 
-            dimMultipliers.graphDesktopW : 
+        const ratioW = window.innerWidth > 800 ?
+            dimMultipliers.graphDesktopW :
             dimMultipliers.graphMobileW; // account for mobile
 
         const graphH = window.innerHeight * ratioH;
-        const graphW = (window.innerWidth * ratioW) - margin.yAxis; 
+        const graphW = (window.innerWidth * ratioW) - margin.yAxis;
 
         this.setState({ graphW, graphH, animateTransition: false });
-      }
+    }
 
     updateMapContainerDimensions = () => {
         const ratioH = dimMultipliers.mapDesktopH;
-        const ratioW = window.innerWidth > 800 ? 
-            dimMultipliers.graphDesktopW : 
+        const ratioW = window.innerWidth > 800 ?
+            dimMultipliers.graphDesktopW :
             dimMultipliers.mapMobileW; // account for mobile 
 
         const mapContainerH = window.innerHeight * ratioH;
-        const mapContainerW = ((window.innerWidth * ratioW) - margin.yAxis) - 
+        const mapContainerW = ((window.innerWidth * ratioW) - margin.yAxis) -
             (6 * (margin.left));
-        
+
         this.setState({ mapContainerW, mapContainerH });
     }
 
     handleCountySelect = (geoid) => {
-        fetchJSON(geoid)
-            .then(dataset => this.setState({dataset, geoid}))
-            .catch(e => console.log('Fetch was problematic: ' + e.message));
+        this.setState({ dataLoaded: false });
+        this.props.fetchDataSet(geoid);
     };
-    
-    handleUpload = (dataset, geoid) => {
-        console.log('Main handleUpload', geoid, dataset)
-        this.setState({dataset, geoid})
+
+    handleUpload = (dataSet, geoid) => {
+        console.log('Main handleUpload', geoid, dataSet);
+        store.dispatch(setDataSet(dataSet));
+        this.setState({ geoid })
     };
 
     render() {
@@ -89,35 +91,46 @@ class MainContainer extends Component {
                     onCountySelect={this.handleCountySelect}>
                 </Search>
 
-                {this.state.dataLoaded &&
-                <MainGraph 
+                {this.state.dataLoaded  &&
+                <MainGraph
                     geoid={this.state.geoid}
-                    dataset={this.state.dataset}
                     width={this.state.graphW}
                     height={this.state.graphH}
                 />}
 
                 {this.state.dataLoaded &&
-                <MainChart 
+                <MainChart
                     geoid={this.state.geoid}
-                    dataset={this.state.dataset}
                     width={this.state.graphW - margin.left - margin.right}
-                    height={this.state.graphH * dimMultipliers.chartDesktopH} 
+                    height={this.state.graphH * dimMultipliers.chartDesktopH}
                 />}
 
                 {this.state.dataLoaded &&
                 <MainMap
                     geoid={this.state.geoid}
-                    dataset={this.state.dataset}
                     width={this.state.mapContainerW - margin.left - margin.right}
                     height={this.state.mapContainerH}
                 />}
-                
-                <Methodology />
-                <About />
+
+                <Methodology/>
+                <About/>
             </Layout>
         )
     }
 }
 
-export default MainContainer;
+function mapStateToProps(state, ownProps) {
+    const { dataSet } = state;
+    console.log("MEOW: " + JSON.stringify(dataSet));
+    return {
+        ...ownProps,
+        dataSet,
+    }
+}
+
+const mapDispatchToProps = {
+    fetchDataSet,
+    setDataSet
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(MainContainer);
