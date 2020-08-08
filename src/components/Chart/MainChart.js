@@ -10,6 +10,7 @@ import { styles, STATS } from '../../utils/constants';
 import { buildScenarios, buildScenarioMap } from '../../utils/utils';
 import { utcParse } from 'd3-time-format'
 import connect from "react-redux/es/connect/connect";
+
 const parseDate = utcParse('%Y-%m-%d')
 
 
@@ -31,25 +32,30 @@ class MainChart extends Component {
         };
     };
 
+    componentDidMount() {
+        this.initializeChart()
+    }
+
     componentDidUpdate(prevProp) {
         const { dataSet } = this.props;
-
         if (dataSet !== prevProp.dataSet) {
-            this.initializeChart(dataSet)
+            this.initializeChart()
         }
     };
 
-    initializeChart(dataSet) {
+    initializeChart() {
+        const { dataSet } = this.props;
+
         // instantiate scenarios, initial default indicators
         const SCENARIOS = buildScenarios(dataSet);
         const scenarioList = SCENARIOS.map(s => s.name);
         const scenarioMap = buildScenarioMap(dataSet);
-        const statList = STATS.slice(0,2)
+        const statList = STATS.slice(0, 2);
 
         // instantiate start and end date (past 2 weeks) for summary stats
         const dates = dataSet[SCENARIOS[0].key].dates.map(d => parseDate(d));
-        const start = new Date(); 
-        start.setDate(start.getDate() - 14); 
+        const start = new Date();
+        start.setDate(start.getDate() - 14);
 
         // dataset needs to be set to state at the same time as other props
         // otherwise, children updates will occur at different times
@@ -62,7 +68,7 @@ class MainChart extends Component {
             statList,
             start,
         }, () => {
-            this.setState({dataLoaded: true});
+            this.setState({ dataLoaded: true });
         })
     }
 
@@ -71,9 +77,9 @@ class MainChart extends Component {
         for (let item of items) {
             scenarioList.push(item)
         }
-        this.setState({scenarioList});        
+        this.setState({ scenarioList });
     }
-    
+
     handleStatClickChart = (items) => {
         // items is Array of scenario names
         let newStats = []
@@ -87,11 +93,17 @@ class MainChart extends Component {
         })
     }
 
-    handleSummaryDates = (start, end) => {this.setState({start: start, end: end})};
+    handleSummaryDates = (start, end) => {
+        this.setState({ start: start, end: end })
+    };
 
-    handleDatePicker = (open) => {this.setState({datePickerActive: open })};
+    handleDatePicker = (open) => {
+        this.setState({ datePickerActive: open })
+    };
 
-    handleScaleToggle = (scale) => {this.setState({ scale: scale })}
+    handleScaleToggle = (scale) => {
+        this.setState({ scale: scale })
+    }
 
     render() {
         const { Content } = Layout;
@@ -103,14 +115,14 @@ class MainChart extends Component {
                             <div className="titleNarrow description-header">A time-based tool you can customize</div>
                             Use this tool to explore expected infections, hospitalizations,
                             ICU cases, ventilators needed, and deaths in your municipality.
-                            For example, if you would like to know how many people will 
-                            be hospitalized in 6 weeks, select hospitalizations  
+                            For example, if you would like to know how many people will
+                            be hospitalized in 6 weeks, select hospitalizations
                             from the indicator dropdown, today as the start date, and 6 weeks out
-                            as the end date. Then, compare expected hospitalization 
-                            numbers across all 
+                            as the end date. Then, compare expected hospitalization
+                            numbers across all
                             intervention scenarios at varying degrees of severity.
                             <div className="mobile-alert">
-                                &#9888; Please use a desktop to access the full feature set, 
+                                &#9888; Please use a desktop to access the full feature set,
                                 including selecting indicators and date range.
                             </div>
                         </div>
@@ -123,7 +135,7 @@ class MainChart extends Component {
                             <ChartContainer
                                 geoid={this.props.geoid}
                                 width={this.props.width}
-                                height={this.props.height} 
+                                height={this.props.height}
                                 dataset={this.state.datasetChart}
                                 scenarios={this.state.scenarioList}
                                 scenarioMap={this.state.scenarioMap}
@@ -147,7 +159,7 @@ class MainChart extends Component {
                     <Col className="gutter-row filters mobile">
                         <Fragment>
                             <Fragment>
-                                <Scenarios 
+                                <Scenarios
                                     view="chart"
                                     SCENARIOS={this.state.SCENARIOS}
                                     scenarioList={this.state.scenarioList}
@@ -158,7 +170,7 @@ class MainChart extends Component {
                                     onStatClickChart={this.handleStatClickChart}
                                 />
                             </Fragment>
-                            <DatePicker 
+                            <DatePicker
                                 firstDate={this.state.dates[0]}
                                 start={this.state.start}
                                 end={this.state.end}

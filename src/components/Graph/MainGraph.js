@@ -60,17 +60,23 @@ class MainGraph extends Component {
         };
     };
 
+    componentDidMount() {
+        this.initialize()
+    }
 
     componentDidUpdate(prevProp) {
-        const { severity, stat } = this.state;
-        if (this.props.dataSet !== prevProp.dataSet) {
-            this.initialize(this.props.dataSet, stat, severity)
+        const { dataSet } = this.props;
+        if (dataSet !== prevProp.dataSet) {
+            alert('nope')
+            this.initialize()
         }
     };
 
-    initialize = (dataSet, stat) => {
+    initialize = () => {
         // initialize() trigged on mount and Dataset change
-        const { dateRange } = this.state
+        const { dateRange, stat } = this.state;
+        const { dataSet } = this.props;
+
 
         // SCENARIOS: various scenario variables used for a given geoid
         const SCENARIOS = buildScenarios(dataSet);

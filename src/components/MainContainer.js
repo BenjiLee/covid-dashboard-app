@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { Component, Fragment } from 'react';
 import { Layout } from 'antd';
 import { defaultGeoid, margin, dimMultipliers } from '../utils/constants';
 import { fetchJSON } from '../utils/fetch';
@@ -91,26 +91,27 @@ class MainContainer extends Component {
                     onCountySelect={this.handleCountySelect}>
                 </Search>
 
-                {this.state.dataLoaded  &&
-                <MainGraph
-                    geoid={this.state.geoid}
-                    width={this.state.graphW}
-                    height={this.state.graphH}
-                />}
-
                 {this.state.dataLoaded &&
-                <MainChart
-                    geoid={this.state.geoid}
-                    width={this.state.graphW - margin.left - margin.right}
-                    height={this.state.graphH * dimMultipliers.chartDesktopH}
-                />}
+                <Fragment>
+                    <MainGraph
+                        geoid={this.state.geoid}
+                        width={this.state.graphW}
+                        height={this.state.graphH}
+                    />
 
-                {this.state.dataLoaded &&
-                <MainMap
-                    geoid={this.state.geoid}
-                    width={this.state.mapContainerW - margin.left - margin.right}
-                    height={this.state.mapContainerH}
-                />}
+                    <MainChart
+                        geoid={this.state.geoid}
+                        width={this.state.graphW - margin.left - margin.right}
+                        height={this.state.graphH * dimMultipliers.chartDesktopH}
+                    />
+
+                    <MainMap
+                        geoid={this.state.geoid}
+                        width={this.state.mapContainerW - margin.left - margin.right}
+                        height={this.state.mapContainerH}
+                    />
+                </Fragment>
+                }
 
                 <Methodology/>
                 <About/>

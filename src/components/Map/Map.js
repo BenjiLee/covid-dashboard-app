@@ -58,7 +58,7 @@ class Map extends Component {
     }
 
     componentWillUnmount() {
-        window.removeEventListener('scroll')
+        window.removeEventListener('scroll', this.handleWindowScrollTooltip)
     }
 
     calculateScales = () => {
