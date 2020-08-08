@@ -7,3 +7,13 @@ export type UpdateStatsForMap = {
 
 export type StatsForMapActions =
     UpdateStatsForMap;
+
+export const UPDATE_DATASET = "UPDATE_DATASET";
+
+export type UpdateDataSet = {
+    type: typeof UPDATE_DATASET,
+    dataSet: string
+}
+
+export type DataSetActions =
+    UpdateDataSet;
