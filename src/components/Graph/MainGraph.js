@@ -61,12 +61,15 @@ class MainGraph extends Component {
     };
 
     componentDidMount() {
+        alert('nope2')
+
         this.initialize()
     }
 
-    componentDidUpdate(prevProp) {
+    componentDidUpdate(prevProps) {
         const { dataSet } = this.props;
-        if (dataSet !== prevProp.dataSet) {
+
+        if (dataSet !== prevProps.dataSet) {
             alert('nope')
             this.initialize()
         }

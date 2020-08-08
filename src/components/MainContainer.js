@@ -36,7 +36,8 @@ class MainContainer extends Component {
     };
 
     componentDidUpdate(prevProps, prevState, snapshot) {
-        if (prevProps.dataSet !== this.props.dataSet) {
+        const { dataSet } = this.props;
+        if (dataSet !== prevProps.dataSet) {
             this.setState({ dataLoaded: true })
         }
     }
@@ -72,7 +73,7 @@ class MainContainer extends Component {
     }
 
     handleCountySelect = (geoid) => {
-        this.setState({ dataLoaded: false });
+        // this.setState({ dataLoaded: false });
         this.props.fetchDataSet(geoid);
     };
 
@@ -122,7 +123,6 @@ class MainContainer extends Component {
 
 function mapStateToProps(state, ownProps) {
     const { dataSet } = state;
-    console.log("MEOW: " + JSON.stringify(dataSet));
     return {
         ...ownProps,
         dataSet,

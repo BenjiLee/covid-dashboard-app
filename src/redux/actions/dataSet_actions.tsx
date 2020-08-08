@@ -16,7 +16,6 @@ export function fetchDataSet(geoid: string): ThunkAction<Promise<void>, {}, {}, 
         try {
             const response = await fetchJSON(geoid);
             dispatch(setDataSet(response));
-            console.log(`fetchDataSet(): fetch successful`);
         } catch (e) {
             console.log(`fetchDataSet(): error when fetching for geoid=${geoid} message=${e.message}`)
         }

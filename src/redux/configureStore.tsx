@@ -11,8 +11,8 @@ export default function configureStore() {
     // This middleware will log all the state changes that happen in redux.
     // keep this disabled as logging will slow down the app and clutter the
     // console.
-    const loggerMiddleware = createLogger();
-    middlewares.push(loggerMiddleware);
+    // const loggerMiddleware = createLogger();
+    // middlewares.push(loggerMiddleware);
 
     return createStore(
         rootReducer,

@@ -36,10 +36,18 @@ class MainChart extends Component {
         this.initializeChart()
     }
 
-    componentDidUpdate(prevProp) {
+    componentDidUpdate(prevProps) {
         const { dataSet } = this.props;
-        if (dataSet !== prevProp.dataSet) {
+        // console.log("MEOW: " + dataSet !== prevProps.dataSet)
+        if (dataSet !== prevProps.dataSet) {
+            // alert('nope2')
+
+            console.log("I AM HERE")
+
             this.initializeChart()
+        } else {
+            console.log("NOOOO HERE: " + (dataSet !== prevProps.dataSet).toString())
+
         }
     };
 
